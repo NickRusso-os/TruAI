@@ -19,6 +19,15 @@ st.markdown(
     }
     .block-container { padding: 2rem 1rem 4rem 1rem; max-width: 820px; margin: 0 auto; }
 
+    /* ---- Links ---- */
+    a {
+        color: #0a84ff;                   /* iOS blue for links */
+        text-decoration: none;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+
     /* ---- Subtle glow background behind main container ---- */
     .block-container:before {
         content: "";
@@ -72,6 +81,7 @@ st.markdown(
         padding: 1.05rem 1.2rem;
         backdrop-filter: blur(24px) saturate(180%);
         box-shadow: 0 2px 10px #0000001a, 0 1px 4px #0000000f;
+        color: #1c1c1e; /* Ensure text is dark for assistant messages */
     }
 
     /* ---- Floating input ---- */
@@ -154,7 +164,7 @@ for msg in st.session_state.messages[1:]:
 # ── 9️⃣  Footer Verse ──────────────────────────────────────────────────────────
 st.markdown(
     """
-    <div style='text-align:center; margin:2rem 0 1rem; font-size:0.9rem; color:#6e6e73;'>
+    <div style='text-align:center; margin:2.5rem 0 1.5rem; font-size:0.9rem; color:#6e6e73;'>
         <em>“The light shines in the darkness, and the darkness has not overcome it.” — John 1:5</em>
     </div>
     """,
