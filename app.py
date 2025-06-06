@@ -14,8 +14,15 @@ st.markdown(
 )
 
 # Load API key
-api_key = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
+# Load API key from Streamlit secrets (Streamlit Cloud will inject this)
+api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
+
+if not api_key:
+    st.error("❌ OPENAI_API_KEY is not set. Please check your Streamlit secrets.")
+    st.stop()
+
 client = OpenAI(api_key=api_key)
+
 
 # Session state for chat history
 if "messages" not in st.session_state:
