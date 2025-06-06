@@ -1,31 +1,42 @@
 import streamlit as st
-import openai
-
-st.set_page_config(page_title="Custom GPT Chatbot", layout="centered")
-
-st.title("💬 Custom GPT Chatbot")
-st.caption("Ask anything. It's tuned to your personality or purpose.")
-
 import os
+from openai import OpenAI
 
-openai.api_key = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
+# Page setup
+st.set_page_config(page_title="🤖 TruAI - Custom Chatbot", layout="centered")
+st.markdown(
+    """
+    <h1 style='text-align: center; color: #4A90E2;'>🤖 TruAI</h1>
+    <p style='text-align: center; font-size: 18px;'>Your custom-tuned AI assistant. Ask anything.</p>
+    <hr style='border: 1px solid #4A90E2;'/>
+    """,
+    unsafe_allow_html=True
+)
 
+# Load API key
+api_key = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=api_key)
 
+# Session state for chat history
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "system", "content": "You are a helpful and sarcastic chatbot."}]
+    st.session_state.messages = [
+        {"role": "system", "content": "You are a helpful, sarcastic assistant named TruAI."}
+    ]
 
-user_input = st.chat_input("Ask something...")
+# Chat input
+user_input = st.chat_input("Ask TruAI anything...")
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    with st.spinner("Thinking..."):
-        response = openai.ChatCompletion.create(
+    with st.spinner("TruAI is thinking..."):
+        response = client.chat.completions.create(
             model="gpt-4o",
             messages=st.session_state.messages
         )
-        reply = response["choices"][0]["message"]["content"]
+        reply = response.choices[0].message.content
         st.session_state.messages.append({"role": "assistant", "content": reply})
 
+# Display chat history
 for msg in st.session_state.messages[1:]:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
