@@ -3,11 +3,6 @@ import os
 from openai import OpenAI
 
 
-
-api_key = st.secrets.get("OPENAI_API_KEY", None)
-st.write("🔍 Key exists? ", bool(api_key))
-st.write("🔑 Key preview: ", api_key[:10] if api_key else "None")
-
 # ---- 🎨 Page and Theme Setup ----
 st.set_page_config(page_title="TruAI — Biblical & Unbiased Guidance", layout="centered")
 st.markdown(
