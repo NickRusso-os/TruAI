@@ -6,7 +6,10 @@ st.set_page_config(page_title="Custom GPT Chatbot", layout="centered")
 st.title("💬 Custom GPT Chatbot")
 st.caption("Ask anything. It's tuned to your personality or purpose.")
 
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+import os
+
+openai.api_key = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
+
 
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "system", "content": "You are a helpful and sarcastic chatbot."}]
