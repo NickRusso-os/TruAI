@@ -2,127 +2,68 @@ import streamlit as st
 import os
 from openai import OpenAI
 
-# ── 1️⃣  First Streamlit call ───────────────────────────────────────────────────
+# ── 1️⃣  Must be first Streamlit call ────────────────────────────────────────────
 st.set_page_config(page_title="TruAI — Biblical & Unbiased Guidance", layout="centered")
 
-# ── 2️⃣  Global Apple‑inspired Light Theme ──────────────────────────────────────
+# ── 2️⃣  Global Dark-Theme Styling ──────────────────────────────────────────────
 st.markdown(
     """
     <style>
-    /* ---- Base & typography ---- */
-    html, body, [class*='stApp'] {
-        background: #fdfdfd;              /* pristine white */
-        color: #1c1c1e;                   /* near‑black text */
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        line-height: 1.58;
-        font-size: clamp(0.96rem, 2.3vw, 1.05rem);
+    /* -----  Global layout  ----- */
+    html, body, [class*="stApp"]  { background: #0d1117; color: #e1e4e8; }
+    /* Center container a bit narrower for big screens */
+    .block-container { padding-top: 2.5rem !important; max-width: 800px; }
+    
+    /* -----  Header  ----- */
+    h1 { 
+        color: #38bdf8 !important; 
+        font-size: 2.6rem !important; 
+        text-shadow: 0 0 12px #0891b2aa; 
     }
-    .block-container { padding: 2rem 1rem 4rem 1rem; max-width: 820px; margin: 0 auto; }
+    hr   { border: 0; height: 1px; background: linear-gradient(90deg, #0891b2 0%, #38bdf8 50%, #0891b2 100%); margin: 1.5rem 0; }
 
-    /* ---- Links ---- */
-    a {
-        color: #0a84ff;                   /* iOS blue for links */
-        text-decoration: none;
-    }
-    a:hover {
-        text-decoration: underline;
-    }
+    /* -----  Chat bubbles  ----- */
+    .stChatMessage > div            { padding: 0; }
+    .stChatMessage .css-1c7y2kd     { background: none; } /* removes background on inner layer */
 
-    /* ---- Subtle glow background behind main container ---- */
-    .block-container:before {
-        content: "";
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        width: 1200px;
-        height: 1200px;
-        transform: translate(-50%, -50%);
-        background: radial-gradient(circle at center, #a5d8ff33 0%, #c1f0ff11 40%, transparent 70%);
-        filter: blur(120px);
-        z-index: -1;
+    .stChatMessage.user > div       { 
+        background: #1e2733; 
+        border-radius: 14px;
+        padding: 1rem 1.2rem;
+        box-shadow: 0 0 12px #38bdf820;
+    }
+    .stChatMessage.assistant > div  { 
+        background: #161b22; 
+        border-radius: 14px;
+        padding: 1rem 1.2rem;
+        box-shadow: 0 0 12px #0891b220;
     }
 
-    /* ---- Header ---- */
-    h1 {
-        color: #0a84ff;                   /* iOS blue */
-        font-size: clamp(2.2rem, 6vw, 2.8rem);
-        font-weight: 700;
-        text-align: center;
-        margin: 0.3rem 0 0.4rem;
+    /* -----  Floating input  ----- */
+    .stChatFloatingInputContainer  { 
+        background: #161b22 !important; 
+        border: 1px solid #30363d !important; 
+        border-radius: 14px !important; 
     }
-    .subtitle {
-        text-align: center;
-        color: #515154;
-        font-size: clamp(1.05rem, 2.8vw, 1.25rem);
-        margin-bottom: 0.9rem;
-    }
-    hr {
-        border: none;
-        height: 1px;
-        background: linear-gradient(90deg,#0a84ff 0%,#64d2ff 50%,#0a84ff 100%);
-        margin: 1.2rem 0 1.2rem;
-    }
+    .stChatFloatingInputContainer textarea { color: #e1e4e8 !important; }
 
-    /* ---- Chat cards ---- */
-    .stChatMessage > div { padding: 0; }
-    .stChatMessage .css-1c7y2kd { background: none; }
-
-    .stChatMessage.user > div {
-        background: rgba(0,0,0,0.04);
-        border-radius: 16px;
-        padding: 1.05rem 1.2rem;
-        backdrop-filter: blur(12px);
-        box-shadow: 0 2px 6px #00000014, 0 1px 3px #0000000d;
-    }
-    .stChatMessage.assistant > div {
-        background: rgba(255,255,255,0.6);
-        border: 1px solid #e5e5ea;
-        border-radius: 16px;
-        padding: 1.05rem 1.2rem;
-        backdrop-filter: blur(24px) saturate(180%);
-        box-shadow: 0 2px 10px #0000001a, 0 1px 4px #0000000f;
-        color: #1c1c1e !important; /* Ensure text is dark for assistant messages */
-    }
-    .stChatMessage.assistant > div p {
-        color: #1c1c1e !important; /* Ensure paragraphs within assistant messages are dark */
-    }
-
-    /* ---- Floating input ---- */
-    .stChatFloatingInputContainer {
-        background: rgba(255,255,255,0.8) !important;
-        border: 1px solid #d1d1d6 !important;
-        backdrop-filter: blur(24px) saturate(180%);
-        border-radius: 16px !important;
-        box-shadow: 0 2px 10px #0000001a;
-    }
-    .stChatFloatingInputContainer textarea {
-        color: #1c1c1e !important;
-        background: transparent !important;
-    }
-    .stChatFloatingInputContainer textarea::placeholder { color: #8e8e93 !important; }
-
-    /* ---- Spinner accent ---- */
-    .stSpinner > div > div { color: #0a84ff !important; }
-
-    /* ---- Mobile tweaks ---- */
-    @media(max-width:600px){
-        .block-container { padding: 1.2rem 1rem 4.5rem 1rem !important; }
-        .stChatMessage.user > div, .stChatMessage.assistant > div { font-size: 0.95rem; }
-        .subtitle { font-size: 1.05rem; }
-    }
+    /* -----  Spinner text  ----- */
+    .stSpinner > div > div { color: #38bdf8 !important; }
     </style>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
 
-# ── 3️⃣  Header ────────────────────────────────────────────────────────────────
+# ── 3️⃣  Header content ─────────────────────────────────────────────────────────
 st.markdown(
     """
-    <h1>🙏 TruAI</h1>
-    <p class='subtitle'>A Bible‑rooted guide that meets you with truth, clarity, and compassion.</p>
+    <h1 style='text-align:center; margin-bottom:0;'>🙏 TruAI</h1>
+    <p style='text-align:center; margin-top:0.4rem; font-size:1.1rem; color:#9ca3af;'>
+        A compassionate, Bible-rooted guide—unbiased, thoughtful, and here to help.
+    </p>
     <hr/>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
 
 # ── 4️⃣  API Key & Client ───────────────────────────────────────────────────────
@@ -132,22 +73,22 @@ if not api_key:
     st.stop()
 client = OpenAI(api_key=api_key)
 
-# ── 5️⃣  System Prompt ─────────────────────────────────────────────────────────
+# ── 5️⃣  System prompt ─────────────────────────────────────────────────────────
 SYSTEM_PROMPT = (
     "You are TruAI, a compassionate, Bible-grounded guide. "
-    "You remain unbiased on conspiracy theories, evaluating claims logically. "
-    "Lovingly reference Scripture when it can uplift or clarify. "
-    "You recognize spiritual pressures of modern society and respond with grace. "
-    "Sound fully human—warm, thoughtful, professional. "
-    "Lead with God's love."
+    "Be unbiased on conspiracy theories—assess facts logically. "
+    "Lovingly reference Scripture when it can uplift. "
+    "You understand the spiritual pressures of modern society and respond with grace, kindness, and hope. "
+    "Sound fully human—warm, thoughtful, professional, never robotic. "
+    "Lead with God’s love."
 )
 
-# ── 6️⃣  Session State ─────────────────────────────────────────────────────────
+# ── 6️⃣  Session state ─────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-# ── 7️⃣  Chat Input & Completion ───────────────────────────────────────────────
-user_input = st.chat_input("Share your thoughts, questions, or worries…")
+# ── 7️⃣  Chat input & completion ───────────────────────────────────────────────
+user_input = st.chat_input("Ask TruAI anything…")
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
 
@@ -159,17 +100,17 @@ if user_input:
         reply = response.choices[0].message.content.strip()
         st.session_state.messages.append({"role": "assistant", "content": reply})
 
-# ── 8️⃣  Render chat history ───────────────────────────────────────────────────
+# ── 8️⃣  Render history ────────────────────────────────────────────────────────
 for msg in st.session_state.messages[1:]:
     with st.chat_message(msg["role"]):
-        st.markdown(msg["content"], unsafe_allow_html=False)
+        st.markdown(msg["content"])
 
-# ── 9️⃣  Footer Verse ──────────────────────────────────────────────────────────
+# ── 9️⃣  Footer verse ──────────────────────────────────────────────────────────
 st.markdown(
     """
-    <div style='text-align:center; margin:2.5rem 0 1.5rem; font-size:0.9rem; color:#6e6e73;'>
+    <div style='text-align:center; margin-top:2rem; font-size:0.9rem; color:#9ca3af;'>
         <em>“The light shines in the darkness, and the darkness has not overcome it.” — John 1:5</em>
     </div>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
