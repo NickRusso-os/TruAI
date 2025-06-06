@@ -81,7 +81,10 @@ st.markdown(
         padding: 1.05rem 1.2rem;
         backdrop-filter: blur(24px) saturate(180%);
         box-shadow: 0 2px 10px #0000001a, 0 1px 4px #0000000f;
-        color: #1c1c1e; /* Ensure text is dark for assistant messages */
+        color: #1c1c1e !important; /* Ensure text is dark for assistant messages */
+    }
+    .stChatMessage.assistant > div p {
+        color: #1c1c1e !important; /* Ensure paragraphs within assistant messages are dark */
     }
 
     /* ---- Floating input ---- */
